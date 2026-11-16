@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@theme{--color-cream:#F7F0E6;--color-blush:#F4C6C3;--color-rose:#D98A92;--color-oat:#C9A98B;--color-caramel:#8E5F5F;--color-cocoa:#5A3A3A;--font-serif:'Playfair Display',serif;--font-hand:'Caveat',cursive;--font-sans:'DM Sans',sans-serif}
+body{@apply bg-cream text-cocoa font-sans}
+h1,h2,h3{font-family:var(--font-serif)}
+.btn{@apply inline-flex items-center justify-center gap-1 rounded-full bg-cocoa text-cream px-5 py-2 text-sm font-medium hover:bg-caramel hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 transition duration-200 cursor-pointer focus-visible:outline-2 focus-visible:outline-caramel}
+.btn-o{@apply inline-flex items-center justify-center gap-1 rounded-full border border-cocoa/40 px-5 py-2 text-sm font-medium hover:bg-blush hover:-translate-y-0.5 transition duration-200 cursor-pointer}
+.card{@apply rounded-3xl bg-white/70 border border-rose/30 shadow-sm}
+.lift{@apply transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-rose}
+.input{@apply w-full rounded-xl border border-rose/50 bg-white px-3 py-2 text-sm outline-none focus:border-caramel focus:ring-2 focus:ring-blush transition}
+.hand{font-family:var(--font-hand)}
+@media print{.noprint{display:none!important}}

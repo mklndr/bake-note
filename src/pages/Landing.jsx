@@ -1,0 +1,24 @@
+import {Link} from 'react-router-dom'
+import Logo from '../components/Logo.jsx'
+import {sampleRecipes as S} from '../data/sampleRecipes.js'
+const strip=[['📖','Recipe book'],['🧁','Baking journal'],['📝','Sticky notes'],['🫙','Pantry match']],bg=['bg-oat','bg-rose','bg-blush']
+export default function Landing(){
+  return <div className="overflow-x-hidden">
+    <nav className="grid grid-cols-2 md:grid-cols-3 items-center px-5 md:px-12 py-4 text-sm"><div className="hidden md:flex gap-6 font-medium"><a href="#collection">Collection</a><a href="#about">About</a></div>
+      <div className="md:justify-self-center"><Logo/></div><div className="flex gap-2 justify-self-end"><Link className="btn-o" to="/login">Sign in</Link><Link className="btn" to="/register">Create account</Link></div></nav>
+    <section className="grid md:grid-cols-2 items-center">
+      <div className="px-6 md:px-14 py-12"><p className="text-xs font-bold tracking-[.25em] text-caramel">HOME BAKING JOURNAL</p><h1 className="text-5xl md:text-7xl font-bold leading-[1.05] mt-3">Sweet moments start here.</h1>
+        <svg width="120" height="14" viewBox="0 0 120 14" className="my-4"><path d="M2 7q7-9 14 0t14 0 14 0 14 0 14 0 14 0 14 0 14 0" fill="none" stroke="#D98A92" strokeWidth="3"/></svg>
+        <p className="max-w-md text-lg">Keep your recipes, bakes, pantry and little reminders in one cozy notebook made for home bakers.</p><Link to="/register" className="btn mt-7 !px-7 !py-3">Start your notebook →</Link></div>
+      <div className="relative bg-rose md:rounded-l-[8rem] min-h-[420px] md:min-h-[580px] grid place-items-center p-10">
+        <img alt="Cupcake" src="https://images.unsplash.com/photo-1587668178277-295251f900ce?w=800" className="h-80 w-80 md:h-[26rem] md:w-[26rem] object-cover shadow-2xl border-8 border-cream" style={{borderRadius:'42% 58% 55% 45% / 50% 45% 55% 50%'}}/>
+        <div className="absolute bottom-6 left-6 md:-left-2 h-32 w-32 rounded-full bg-oat grid place-items-center shadow-lg rotate-[-8deg]"><svg viewBox="0 0 100 100" className="absolute inset-0 animate-[spin_24s_linear_infinite]"><defs><path id="c" d="M50,50 m-37,0 a37,37 0 1,1 74,0 a37,37 0 1,1 -74,0"/></defs><text fontSize="9.5" fontWeight="700" letterSpacing="1.5" fill="#5A3A3A"><textPath href="#c">BAKED BY YOU · WITH LOVE · SMALL BATCHES ·</textPath></text></svg><span className="text-3xl">🧁</span></div></div></section>
+    <section className="bg-blush py-6 px-5 grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-sm font-medium">{strip.map(([e,l])=><div key={l} className="md:border-r last:border-0 border-cocoa/30"><span className="text-2xl block">{e}</span>{l}</div>)}</section>
+    <section id="collection" className="px-5 md:px-12 py-16 grid md:grid-cols-4 gap-5 items-stretch">
+      <div className="flex flex-col justify-center"><p className="text-xs font-bold tracking-widest text-caramel">OUR COLLECTION</p><h2 className="text-4xl md:text-5xl font-bold leading-tight my-3">Better baking notes.</h2><p className="mb-4">Browse built-in recipes, then save them and make them yours.</p><Link to="/register" className="underline font-medium">Start collecting</Link></div>
+      {S.slice(0,3).map((r,i)=><div key={r.sid} className="card lift overflow-hidden bg-white"><div className={bg[i]+' p-4'}><img src={r.image} alt={r.title} className="h-48 w-full object-cover rounded-2xl"/></div><div className="p-4 flex justify-between items-center"><div><p className="font-bold">{r.title}</p><p className="text-xs">{r.category} · {r.servings} servings</p></div><Link to="/register" aria-label="Save" className="h-8 w-8 rounded-full bg-rose text-white grid place-items-center">+</Link></div></div>)}</section>
+    <section id="about" className="px-5 md:px-12 pb-16 grid md:grid-cols-3 gap-5">
+      <div className="md:col-span-2 rounded-[2rem] bg-cocoa text-cream grid sm:grid-cols-2 overflow-hidden"><div className="p-8 md:p-10 flex flex-col justify-center"><p className="text-xs tracking-widest text-oat">RECIPES MADE PERSONAL</p><h2 className="text-4xl font-bold leading-tight my-3">Every recipe has a story.</h2><p className="hand text-2xl text-blush">Stick a note. Log the bake. Remember why.</p></div><img alt="" src={S[3].image} className="h-64 sm:h-full w-full object-cover"/></div>
+      <div className="rounded-[2rem] bg-oat p-8 grid place-items-center text-center"><div><p className="hand text-4xl text-cocoa">cozy bakes,<br/>cozy notes</p><p className="mt-3 text-sm">Free · works in your browser · your data stays with you</p><Link to="/register" className="btn mt-4">Create account</Link></div></div></section>
+    <footer className="bg-cocoa text-cream px-6 py-8 flex flex-wrap justify-between gap-3 text-sm"><Logo size={28}/><span>Built with React, Vite &amp; Tailwind CSS · Recipes via TheMealDB</span></footer></div>
+}
