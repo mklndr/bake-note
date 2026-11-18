@@ -6,7 +6,7 @@ import {Title,Field,ImageUpload,Stars} from '../components/ui.jsx'
 import StickyNote,{NOTE_COLORS} from '../components/StickyNote.jsx'
 import InteractiveBook from '../components/InteractiveBook.jsx'
 import Icon from '../components/Icon.jsx'
-import {SAMPLE_J,sampleEntries} from '../demoSeed.js'
+import {SAMPLE_BOOK,sampleEntries,bookEntries} from '../demoSeed.js'
 const SPINE=['#3B2A2A','#7A6258','#B98F88','#8F6E63','#A38476','#5E463E'],W=320,H=460
 const blank=()=>({recipeId:'',date:new Date().toISOString().slice(0,10),photo:'',notes:'',good:'',improve:'',rating:0})
 export default function Journal(){
@@ -16,9 +16,9 @@ export default function Journal(){
   const books=[...data.journals].reverse(),book=books.find(b=>b.id===openId),inBook=(x,id)=>x.bookId===id||(!x.bookId&&id==='default')
   const entries=id=>data.journal.filter(j=>inBook(j,id)).sort((a,b)=>a.date.localeCompare(b.date)),rt=id=>data.recipes.find(r=>r.id===id)?.title||'Freestyle bake'
   const set=k=>e=>setF({...f,[k]:e.target.value})
-  const sampleCount=data.journal.filter(j=>j.sample).length,addSampleJournal=()=>{const list=sampleEntries(data.recipes,sampleCount);[...list].reverse().forEach(x=>add('journal',x));toast(`${list.length} sample journal entries added to My Baking Journal`)}
+  const hasDefaultSample=data.journal.some(j=>j.sample&&!j.bookId),hasBookSample=data.journals.some(b=>b.id===SAMPLE_BOOK.id),addSampleJournal=()=>{if(!hasDefaultSample)[...sampleEntries(data.recipes)].reverse().forEach(x=>add('journal',x));if(!hasBookSample){add('journals',SAMPLE_BOOK);[...bookEntries(data.recipes)].reverse().forEach(x=>add('journal',x))};toast('Sample journals added to the shelf')}
   const addBook=e=>{e.preventDefault();if(!nm.trim())return;add('journals',{title:nm.trim(),color:SPINE[data.journals.length%SPINE.length],marks:[]});setNm('');toast('Journal added to the shelf')}
-  if(!book)return <div><Title sub={`${data.journal.length} bakes in ${books.length} journals. Pick one from the shelf to open it.`} action={<div className="flex flex-wrap gap-2">{sampleCount<SAMPLE_J.length&&<button type="button" className="btn-o" onClick={addSampleJournal}>Add sample journal</button>}<form onSubmit={addBook} className="flex gap-2"><input aria-label="New journal name" className="input w-48" placeholder="New journal name" value={nm} onChange={e=>setNm(e.target.value)}/><button className="btn">Add journal</button></form></div>}>Baking Journal</Title>
+  if(!book)return <div><Title sub={`${data.journal.length} bakes in ${books.length} journals. Pick one from the shelf to open it.`} action={<div className="flex flex-wrap gap-2">{(!hasDefaultSample||!hasBookSample)&&<button type="button" className="btn-o" onClick={addSampleJournal}>Add sample journal</button>}<form onSubmit={addBook} className="flex gap-2"><input aria-label="New journal name" className="input w-48" placeholder="New journal name" value={nm} onChange={e=>setNm(e.target.value)}/><button className="btn">Add journal</button></form></div>}>Baking Journal</Title>
     <div className="rounded-[2rem] bg-blush/70 p-4 md:p-8 shadow-inner"><div className="stagger flex flex-wrap items-end gap-3 min-h-60 px-2">
       {books.map((b,i)=><button key={b.id} onClick={()=>{setOpenId(b.id);setIdx(-1)}} aria-label={`Open ${b.title}`} style={{background:b.color,height:190+(i%3)*20}} className="group relative w-16 origin-bottom overflow-hidden rounded-t-md rounded-b-sm text-cream shadow-lg transition duration-300 hover:-translate-y-3 hover:-rotate-2 focus-visible:-translate-y-3">
         <span className="absolute inset-x-3 top-3 h-1.5 rounded bg-butter/80"/><span className="absolute inset-x-3 top-7 h-px bg-butter/50"/>

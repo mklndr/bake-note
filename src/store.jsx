@@ -1,5 +1,5 @@
 import {createContext,useContext,useEffect,useState,useCallback} from 'react'
-import {isDemo,seedData,sampleEntries,SAMPLE_J} from './demoSeed.js'
+import {isDemo,seedData,bookEntries,SAMPLE_BOOK} from './demoSeed.js'
 const C=createContext()
 export const useApp=()=>useContext(C)
 export const uid=()=>Math.random().toString(36).slice(2,9)
@@ -12,8 +12,14 @@ export function Provider({children}){
   const [msg,setMsg]=useState(null)
   useEffect(()=>{if(user)try{localStorage.setItem('bn_data_'+user.id,JSON.stringify(data))}catch{setMsg({t:'Storage is full – delete some photos.',err:1})}},[data,user])
   useEffect(()=>{if(!user||!isDemo(user))return
-    if(!localStorage.getItem('bn_seeded_'+user.id)){setData(d=>seedData(d,uid));localStorage.setItem('bn_seeded_'+user.id,'1');localStorage.setItem('bn_seeded_j2_'+user.id,'1');setMsg({t:'Sample ingredients and journal added to your account'});setTimeout(()=>setMsg(null),3500)}
-    else if(!localStorage.getItem('bn_seeded_j2_'+user.id)){localStorage.setItem('bn_seeded_j2_'+user.id,'1');setData(d=>{const n=d.journal.filter(j=>j.sample).length;return n&&n<SAMPLE_J.length?{...d,journal:[...sampleEntries(d.recipes,n).map(e=>({id:uid(),...e})),...d.journal]}:d});setMsg({t:'3 more sample journal entries added'});setTimeout(()=>setMsg(null),3500)}},[user])
+    const seeded=localStorage.getItem('bn_seeded_'+user.id),v3=localStorage.getItem('bn_seeded_j3_'+user.id)
+    if(!seeded){setData(d=>seedData(d,uid));localStorage.setItem('bn_seeded_'+user.id,'1');localStorage.setItem('bn_seeded_j3_'+user.id,'1');setMsg({t:'Sample ingredients and journals added to your account'});setTimeout(()=>setMsg(null),3500)}
+    else if(!v3){localStorage.setItem('bn_seeded_j3_'+user.id,'1')
+      // move the extra sample pages out of My Baking Journal into their own journal
+      const extra=['Golden top and a tender middle.','Tasty, but it sank slightly','Flaky layers and a perfect rise.']
+      setData(d=>{const journal=d.journal.filter(j=>!(j.sample&&extra.some(x=>(j.notes||'').startsWith(x))))
+        if(d.journals.some(b=>b.id===SAMPLE_BOOK.id))return{...d,journal}
+        return{...d,journals:[...d.journals,SAMPLE_BOOK],journal:[...bookEntries(d.recipes).map(e=>({id:uid(),...e})),...journal]}});setMsg({t:'New sample journal “Weekend Experiments” added to your shelf'});setTimeout(()=>setMsg(null),3500)}},[user])
   const toast=useCallback((t,err)=>{setMsg({t,err});setTimeout(()=>setMsg(null),2500)},[])
   const start=u=>{setData(load(u.id));setUser(u);localStorage.setItem('bn_session',JSON.stringify(u))}
   const register=(name,email,pw)=>{
