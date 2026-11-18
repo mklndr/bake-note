@@ -1,5 +1,7 @@
 import {useState,useEffect} from 'react'
-import {useApp} from '../store.jsx'
+import {createPortal} from 'react-dom'
+import {motion} from 'framer-motion'
+import {useApp,uid} from '../store.jsx'
 import {Title,Field,ImageUpload,Stars} from '../components/ui.jsx'
 import StickyNote,{NOTE_COLORS} from '../components/StickyNote.jsx'
 import InteractiveBook from '../components/InteractiveBook.jsx'
@@ -8,7 +10,7 @@ import {SAMPLE_J,dayAgo} from '../demoSeed.js'
 const SPINE=['#3B2A2A','#7A6258','#B98F88','#8F6E63','#A38476','#5E463E'],W=320,H=460
 const blank=()=>({recipeId:'',date:new Date().toISOString().slice(0,10),photo:'',notes:'',good:'',improve:'',rating:0})
 export default function Journal(){
-  const {user,data,add,upd,del,toast}=useApp(),[openId,setOpenId]=useState(null),[idx,setIdx]=useState(-1),[sc,setSc]=useState(1),[nm,setNm]=useState(''),[f,setF]=useState(null),[err,setErr]=useState('')
+  const {user,data,add,upd,del,toast}=useApp(),[openId,setOpenId]=useState(null),[en,setEn]=useState(null),[idx,setIdx]=useState(-1),[sc,setSc]=useState(1),[nm,setNm]=useState(''),[f,setF]=useState(null),[err,setErr]=useState('')
   useEffect(()=>{if(!data.journals.some(b=>b.id==='default'))add('journals',{id:'default',title:'My Baking Journal',color:SPINE[0],marks:[]})},[data.journals])
   useEffect(()=>{const r=()=>setSc(Math.min(1,(window.innerWidth-48)/(W*2.1)));r();window.addEventListener('resize',r);return()=>window.removeEventListener('resize',r)},[])
   const books=[...data.journals].reverse(),book=books.find(b=>b.id===openId),inBook=(x,id)=>x.bookId===id||(!x.bookId&&id==='default')
@@ -30,7 +32,8 @@ export default function Journal(){
     :[{pageNumber:1,content:<div className="grid h-full place-items-center text-center"><p className="hand text-3xl text-caramel">Your first bake goes here.<br/>Tap “New entry”.</p></div>,backContent:<p className="hand text-2xl text-caramel">Add sticky notes and drag them anywhere on the book.</p>}]
   const marks=(book.marks||[]).filter(m=>m<pages.length),r=idx+1,marked=marks.includes(r),notes=data.notes.filter(n=>n.onJournal&&inBook(n,openId)),faceId=(side,i)=>side==='L'?(i<0?'cover':`b:${pages[i].id??i}`):(i+1<pages.length?`f:${pages[i+1].id??i+1}`:'end'),noteFace=n=>n.face??`f:${pages[0].id??0}`
   const toggleMark=()=>{if(r>=pages.length)return toast('Turn to a page with an entry first',1);upd('journals',openId,{marks:marked?marks.filter(m=>m!==r):[...marks,r].sort((a,b)=>a-b)});toast(marked?'Bookmark removed':'Page bookmarked')}
-  const addNote=side=>{const face=faceId(side,idx),k=notes.filter(n=>noteFace(n)===face).length%4;add('notes',{title:'New note',text:'Tap Edit to write me',color:NOTE_COLORS[notes.length%6],category:'Personal Notes',pinned:false,onJournal:true,bookId:openId,face,recipeId:'',x:60+k*20,y:90+k*30})}
+  const addNote=side=>{const id=uid(),face=faceId(side,idx),k=notes.filter(n=>noteFace(n)===face).length%4,color=NOTE_COLORS[notes.length%6];add('notes',{id,title:'',text:'',color,category:'Personal Notes',pinned:false,onJournal:true,bookId:openId,face,recipeId:'',x:60+k*20,y:90+k*30});setEn({id,title:'',text:'',color,isNew:true})}
+  const closeEn=()=>{if(en?.isNew)del('notes',en.id);setEn(null)}
   const submit=e=>{e.preventDefault();if(!f.date||(!f.notes.trim()&&!f.good.trim()))return setErr('Add a date and at least a few notes.');add('journal',{...f,bookId:openId});setIdx(list.length-1);setF(null);setErr('');toast('Journal entry saved')}
   const dropBook=()=>{if(!confirm('Delete this journal and all its entries?'))return;data.journal.filter(j=>inBook(j,openId)).forEach(j=>del('journal',j.id));notes.forEach(n=>del('notes',n.id));del('journals',openId);setOpenId(null)}
   return <div className="space-y-4"><div className="noprint flex flex-wrap items-center gap-2"><button className="btn-o" onClick={()=>setOpenId(null)}>Back to shelf</button><h1 className="mr-auto font-serif text-2xl font-bold">{book.title}</h1>
@@ -46,6 +49,11 @@ export default function Journal(){
       {err&&<p role="alert" className="text-sm text-red-700">{err}</p>}<div className="flex gap-2 md:col-span-2"><button className="btn">Save entry</button><button type="button" className="btn-o" onClick={()=>{setF(null);setErr('')}}>Cancel</button></div></form>}
     <div className="flex justify-center overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_20%_15%,#E8D8CE,transparent_45%),radial-gradient(circle_at_85%_85%,#B98F88,transparent_45%)] bg-blush/70 py-8"><div style={{width:W*2.2*sc,height:(H+90)*sc}}><div style={{width:W*2.2,height:H+90,transform:`scale(${sc})`,transformOrigin:'top left'}}>
       <InteractiveBook key={openId} defaultOpen width={W} height={H} bookTitle={book.title} bookAuthor={user.name} coverImage={list.find(j=>j.photo)?.photo} pages={pages} index={idx} onIndexChange={setIdx} onClose={()=>setOpenId(null)} bookmarks={marks}
-        pageNotes={face=>notes.filter(n=>noteFace(n)===face).map(n=><StickyNote key={n.id} n={n} drag sc={sc} onMove={(x,y)=>upd('notes',n.id,{x,y})} onPin={()=>upd('notes',n.id,{pinned:!n.pinned})} onEdit={()=>{const t=prompt('Note text',n.text);if(t!==null)upd('notes',n.id,{text:t})}} onDel={()=>del('notes',n.id)} recipe={data.recipes.find(x=>x.id===n.recipeId)}/>)}/></div></div></div>
-    <p className="noprint text-center text-sm text-caramel">Arrow keys or a click turn the pages. Sticky notes are stuck to a page and turn over with it. Drag them anywhere on their page.</p></div>
+        pageNotes={face=>notes.filter(n=>noteFace(n)===face).map(n=><StickyNote key={n.id} n={n} drag sc={sc} onMove={(x,y)=>upd('notes',n.id,{x,y})} onPin={()=>upd('notes',n.id,{pinned:!n.pinned})} onEdit={()=>setEn({id:n.id,title:n.title||'',text:n.text||'',color:n.color})} onDel={()=>del('notes',n.id)} recipe={data.recipes.find(x=>x.id===n.recipeId)}/>)}/></div></div></div>
+    <p className="noprint text-center text-sm text-caramel">Arrow keys or a click turn the pages. Sticky notes are stuck to a page and turn over with it. Drag them anywhere on their page.</p>{en&&createPortal(<motion.div className="fixed inset-0 z-[60] grid place-items-center bg-cocoa/40 p-4 backdrop-blur-sm" initial={{opacity:0}} animate={{opacity:1}} onClick={closeEn} onKeyDown={e=>e.key==='Escape'&&closeEn()}>
+      <motion.form initial={{opacity:0,y:18,scale:.96}} animate={{opacity:1,y:0,scale:1}} transition={{type:'spring',stiffness:380,damping:30}} onClick={e=>e.stopPropagation()} onSubmit={e=>{e.preventDefault();upd('notes',en.id,{title:en.title.trim()||'Note',text:en.text,color:en.color});setEn(null);toast('Note saved')}} className="w-full max-w-md space-y-4 rounded-3xl border border-white/70 bg-cream/95 p-6 shadow-2xl">
+        <div className="flex items-center justify-between"><h2 className="text-2xl font-bold">{en.isNew?'New sticky note':'Edit sticky note'}</h2><button type="button" aria-label="Close" onClick={closeEn} className="grid h-9 w-9 place-items-center rounded-full transition hover:bg-blush">✕</button></div>
+        <div style={{background:en.color}} className="space-y-2 rounded-2xl p-4 shadow-md"><input aria-label="Note title" autoFocus className="hand w-full bg-transparent text-3xl outline-none placeholder:text-cocoa/40" placeholder="Title" value={en.title} onChange={e=>setEn({...en,title:e.target.value})}/><textarea aria-label="Note text" rows={5} className="w-full resize-none bg-transparent text-sm outline-none placeholder:text-cocoa/40" placeholder="Write your note here" value={en.text} onChange={e=>setEn({...en,text:e.target.value})}/></div>
+        <div className="flex items-center gap-2"><span className="mr-1 text-sm text-caramel">Color</span>{NOTE_COLORS.map(c=><button type="button" key={c} aria-label={'Color '+c} onClick={()=>setEn({...en,color:c})} style={{background:c}} className={`h-8 w-8 rounded-full border-2 transition ${en.color===c?'scale-110 border-cocoa':'border-white'}`}/>)}</div>
+        <div className="flex items-center gap-2"><button className="btn">Save note</button><button type="button" className="btn-o" onClick={closeEn}>Cancel</button>{!en.isNew&&<button type="button" className="ml-auto text-sm text-red-700 underline" onClick={()=>{del('notes',en.id);setEn(null)}}>Delete</button>}</div></motion.form></motion.div>,document.body)}</div>
 }
