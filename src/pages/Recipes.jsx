@@ -35,7 +35,7 @@ export function Recipes(){
     :<Empty>{data.recipes.length?'No recipes match your filters.':<>Your recipe book is empty. Add your first recipe, or <button className="underline" onClick={addSamples}>load sample recipes</button> to try the book view.</>}</Empty>}</div>
 }
 export function RecipeDetail(){
-  const {id}=useParams(),{data,del,toast,upd,add}=useApp(),nav=useNavigate(),r=data.recipes.find(x=>x.id===id)
+  const {id}=useParams(),{data,del,toast,upd,add,ask}=useApp(),nav=useNavigate(),r=data.recipes.find(x=>x.id===id)
   const [u,setU]=useState(()=>localStorage.getItem('bn_unit')||'original'),[t,setT]=useState(()=>localStorage.getItem('bn_temp')||'original'),[nt,setNt]=useState({title:'',text:'',color:NOTE_COLORS[0]}),[sc,setSc]=useState('1'),[menu,setMenu]=useState(false),[from,setFrom]=useState(PANS[2][0]),[to,setTo]=useState(PANS[2][0]),[cur,setCur]=useState(()=>localStorage.getItem('bn_cur')||'₱')
   if(!r)return <Empty>Recipe not found. <Link className="underline" to="/recipes">Back to your book</Link></Empty>
   const pick=(k,set)=>e=>{set(e.target.value);localStorage.setItem(k,e.target.value)}

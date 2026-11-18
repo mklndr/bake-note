@@ -42,9 +42,12 @@ function UseItUp({pantry,recipes}){
     :<p className="text-sm text-caramel">Nothing in your pantry is close to expiring. Add expiry dates to your ingredients and they will show up here.</p>}</div>
 }
 export default function Dashboard(){
-  const {user,data}=useApp(),rec=data.recipes,[now,setNow]=useState(()=>new Date()),h=now.getHours(),greet=h>=5&&h<12?'Good morning':h>=12&&h<18?'Good afternoon':'Good evening'
+  const {user,data}=useApp(),rec=data.recipes,[now,setNow]=useState(()=>new Date()),h=now.getHours(),greet=h>=5&&h<12?'Good morning':h>=12&&h<18?'Good afternoon':h>=18&&h<22?'Good evening':'Hello'
   useEffect(()=>{const i=setInterval(()=>setNow(new Date()),30000);return()=>clearInterval(i)},[])
   return <div className="space-y-10">
+    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#F7E3C8] via-[#F9EBD7] to-[#F4D5CC] p-6 shadow-md ring-1 ring-white/70 md:p-7"><span aria-hidden="true" className="absolute -right-6 -top-8 h-32 w-32 rounded-full bg-butter/60"/><span aria-hidden="true" className="absolute -bottom-10 left-1/3 h-24 w-24 rounded-full bg-rose/20"/>
+      <div className="relative flex items-center gap-5"><span aria-hidden="true" className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-white/80 text-4xl shadow-sm">🥄</span>
+        <div className="min-w-0"><p className="inline-flex items-center gap-1.5 rounded-full bg-cocoa px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-cream">✨ Baker’s tip of the day</p><p className="hand mt-2 text-3xl leading-8">{TIPS[Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/864e5)%TIPS.length]}</p></div></div></section>
     <section className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-cocoa via-[#57423A] to-berry p-6 text-cream md:p-9">
       <span className="absolute -right-12 -top-16 h-56 w-56 rounded-full bg-rose/25"/><span className="absolute -bottom-20 right-40 h-44 w-44 rounded-full bg-blush/15"/>
       <div className="relative flex flex-wrap items-center justify-between gap-6"><div className="rise shrink-0"><h1 className="text-3xl font-bold md:text-4xl">{greet}, {user.name.split(' ')[0]}</h1><p className="mt-1 text-blush">{now.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'})}</p></div>
@@ -53,6 +56,5 @@ export default function Dashboard(){
       {rec.length?<div className="stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{rec.slice(0,4).map(r=><Mini key={r.id} r={r}/>)}</div>
       :<Empty>Nothing yet. <Link className="underline" to="/discover">Find a recipe to save</Link> or <Link className="underline" to="/recipes/new">write your own</Link>.</Empty>}</section>
     <section className="stagger grid gap-6 lg:grid-cols-3"><Calendar journal={data.journal} recipes={rec}/><Timers/><UseItUp pantry={data.pantry} recipes={rec}/></section>
-    <section className="relative flex items-start gap-4 overflow-hidden rounded-3xl border border-white/70 bg-[#EBD9CC] p-6 shadow-md md:p-7"><span aria-hidden="true" className="absolute -top-2 left-8 h-6 w-20 rotate-2 bg-rose/50"/><span aria-hidden="true" className="mt-2 text-3xl">🧁</span>
-      <div><p className="text-xs font-bold uppercase tracking-widest text-caramel">Baker’s tip of the day</p><p className="hand mt-1 text-3xl leading-8">{TIPS[Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/864e5)%TIPS.length]}</p></div></section></div>
+</div>
 }
