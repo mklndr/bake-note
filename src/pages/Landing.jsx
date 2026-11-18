@@ -50,5 +50,5 @@ export default function Landing(){
       <div className="bg-cocoa p-10 text-cream md:p-14 lg:rounded-r-[4rem]"><p className="text-xs font-bold uppercase tracking-[.25em] text-blush">Rituals made simple</p><h2 className="mt-3 text-4xl font-bold leading-tight md:text-5xl">Everyday is a good bake day.</h2><p className="mt-4 text-blush">Free, private and kept in your browser.</p><Link to="/register" className="mt-6 inline-flex items-center rounded-full bg-cream px-7 py-3 font-bold text-cocoa transition hover:bg-blush">Create account</Link></div>
       <img src={S[3].image} alt={S[3].title} className="h-72 w-full object-cover lg:h-full"/>
       <div className="flex flex-col items-center justify-center gap-4 bg-rose p-10 text-center text-cocoa lg:rounded-l-[4rem]"><Badge className="spin h-32 w-32"/><p className="hand text-3xl">Every recipe has a story.</p></div></section>
-    <footer className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-3 px-4 py-8 text-sm text-caramel md:px-8"><Logo tag/><span>Built with React, Vite and Tailwind CSS. Recipes from TheMealDB.</span></footer></div>
+    <footer className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-3 px-4 py-8 text-sm text-caramel md:px-8"><Logo tag/></footer></div>
 }
