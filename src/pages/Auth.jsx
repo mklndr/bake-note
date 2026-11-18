@@ -8,7 +8,7 @@ export default function Auth({register}){
   const set=k=>e=>setF({...f,[k]:e.target.value})
   const submit=e=>{e.preventDefault();const r=register?reg(f.name,f.email,f.pw):login(f.email,f.pw);r?setErr(r):nav('/dashboard')}
   return <div className="min-h-screen grid place-items-center p-5 bg-gradient-to-br from-blush to-cream"><form onSubmit={submit} className="card p-8 w-full max-w-sm space-y-4">
-    <Link to="/"><Logo/></Link><h1 className="text-2xl">{register?'Create your notebook':'Welcome back'}</h1>
+    <Link to="/"><Logo size={84}/></Link><h1 className="text-2xl">{register?'Create your notebook':'Welcome back'}</h1>
     {register&&<Field label="Name"><input className="input" value={f.name} onChange={set('name')}/></Field>}
     <Field label="Email"><input className="input" type="email" value={f.email} onChange={set('email')}/></Field>
     <Field label="Password"><input className="input" type="password" value={f.pw} onChange={set('pw')}/></Field>

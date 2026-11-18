@@ -39,7 +39,7 @@ export function RecipeDetail(){
   const [u,setU]=useState(()=>localStorage.getItem('bn_unit')||'original'),[t,setT]=useState(()=>localStorage.getItem('bn_temp')||'original'),[nt,setNt]=useState({title:'',text:'',color:NOTE_COLORS[0]}),[sc,setSc]=useState('1'),[menu,setMenu]=useState(false),[from,setFrom]=useState(PANS[2][0]),[to,setTo]=useState(PANS[2][0]),[cur,setCur]=useState(()=>localStorage.getItem('bn_cur')||'₱')
   if(!r)return <Empty>Recipe not found. <Link className="underline" to="/recipes">Back to your book</Link></Empty>
   const pick=(k,set)=>e=>{set(e.target.value);localStorage.setItem(k,e.target.value)}
-  const remove=()=>{if(confirm('Delete this recipe?')){del('recipes',id);toast('Recipe deleted');nav('/recipes')}}
+  const remove=async()=>{if(await ask({title:'Delete this recipe?',text:`“${r.title}” will be removed from your recipe book.`,ok:'Delete',danger:true})){del('recipes',id);toast('Recipe deleted');nav('/recipes')}}
   const f=num(sc)>0?num(sc):1,pf=panFactor(from,to),costs=r.costs||{},sum=Object.values(costs).reduce((a,b)=>a+(+b||0),0),sv=num(r.servings),m=v=>cur+(Math.round(v*100)/100).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})
   const notes=data.notes.filter(n=>n.recipeId===id)
   const addNote=e=>{e.preventDefault();if(!nt.title.trim()&&!nt.text.trim())return toast('Write something first',1);add('notes',{...nt,category:'Baking Tips',pinned:false,onJournal:false,recipeId:id,x:30,y:30});setNt({...nt,title:'',text:''});toast('Note added')}
@@ -61,7 +61,7 @@ export function RecipeDetail(){
         {sum>0&&<p className="border-t border-blush pt-2 font-medium">Total at {f}×: {m(sum*f)}{sv>0&&`, ${m(sum/sv)} per serving`}</p>}</div></details><h2 className="text-2xl mt-2 mb-3">Recipe notes</h2>
     <div className="flex flex-wrap gap-5 mb-4">{notes.map(n=><div key={n.id} className="w-52"><StickyNote n={n} onPin={()=>upd('notes',n.id,{pinned:!n.pinned})} onEdit={()=>nav('/notes')} onDel={()=>del('notes',n.id)}/></div>)}{!notes.length&&<p className="text-sm text-cocoa/60">No notes for this recipe yet.</p>}</div>
     <form onSubmit={addNote} className="noprint card p-4 space-y-2 max-w-md"><input aria-label="Note title" className="input" placeholder="Note title" value={nt.title} onChange={e=>setNt({...nt,title:e.target.value})}/><textarea aria-label="Note" className="input" rows={2} placeholder="e.g. Used less sugar – came out better" value={nt.text} onChange={e=>setNt({...nt,text:e.target.value})}/>
-      <div className="flex items-center gap-2">{NOTE_COLORS.map(c=><button type="button" key={c} aria-label={'Color '+c} onClick={()=>setNt({...nt,color:c})} style={{background:c}} className={`h-7 w-7 rounded-full border-2 ${nt.color===c?'border-cocoa':'border-transparent'}`}/>)}<button className="btn ml-auto">Add note</button></div></form></aside></div></article>
+      <div className="flex items-center gap-2">{NOTE_COLORS.map(c=><button type="button" key={c} aria-label={'Color '+c} onClick={()=>setNt({...nt,color:c})} style={{background:c}} className={`h-7 w-7 rounded-full border-2 ${nt.color===c?'border-cocoa':'border-transparent'}`}/>)}<input type="color" aria-label="Custom colour" value={nt.color} onChange={e=>setNt({...nt,color:e.target.value})} className="h-7 w-9 cursor-pointer rounded border-0 bg-transparent p-0"/><button className="btn ml-auto">Add note</button></div></form></aside></div></article>
 }
 export function RecipeForm(){
   const {id}=useParams(),{data,add,upd,toast}=useApp(),nav=useNavigate(),old=data.recipes.find(x=>x.id===id)

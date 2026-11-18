@@ -23,7 +23,7 @@ export default function Discover(){
   const base=src==='mine'?mine:src==='all'?[...built,...ext]:items[src]||[],hay=r=>[r.title,...(r.ingredients||[]).map(i=>i.name)].join(' ').toLowerCase()
   const list=base.filter(r=>(!cat||r.category===cat)&&(!q||['recipeapi','spoon'].includes(r.src)||hay(r).includes(q.toLowerCase())))
   const chips=CATS.filter(c=>c!=='Other bakes'||base.some(r=>r.category==='Other bakes'))
-  return <div><Title sub="Baking recipes from TheMealDB, RecipeAPI and Spoonacular. Savory dishes are filtered out.">Discover Recipes</Title>
+  return <div><Title sub="Baking recipes from TheMealDB, RecipeAPI and Spoonacular.">Discover Recipes</Title>
     <div className="mb-3 flex flex-wrap items-center gap-2"><input aria-label="Search recipes" className="input max-w-md flex-1" placeholder="Search recipes or ingredients" value={qi} onChange={e=>setQi(e.target.value)}/>
       <select aria-label="Source" className="input w-48" value={src} onChange={e=>setSrc(e.target.value)}>{SRC.map(([k,l])=><option key={k} value={k}>{l}</option>)}</select></div>
     <div className="mb-5 flex flex-wrap gap-2">{['',...chips].map(c=><button key={c} onClick={()=>setCat(c)} className={cat===c?'btn':'btn-o'}>{c||'All categories'}</button>)}</div>

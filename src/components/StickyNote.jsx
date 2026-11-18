@@ -1,4 +1,4 @@
-export const NOTE_COLORS=['#fde68a','#fbcfe8','#bfdbfe','#bbf7d0','#fed7aa','#ddd6fe']
+export const NOTE_COLORS=['#EBD9CC','#E6C9BE','#EADBCB','#D8C0B8','#DDCABF','#C9A9A0']
 export const CATS=['Baking Tips','Ingredient Substitutions','Recipe Ideas','Quick Reminders','Personal Notes']
 export default function StickyNote({n,drag,onMove,onEdit,onDel,onPin,recipe,sc=1}){
   const tilt=(n.id.charCodeAt(0)%5-2)+'deg'

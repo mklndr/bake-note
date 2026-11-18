@@ -11,7 +11,7 @@ function Tilt({children,className}){
   const x=useMotionValue(0),y=useMotionValue(0),sp={stiffness:150,damping:16},rx=useSpring(useTransform(y,[-.5,.5],[9,-9]),sp),ry=useSpring(useTransform(x,[-.5,.5],[-9,9]),sp)
   const move=e=>{const b=e.currentTarget.getBoundingClientRect();x.set((e.clientX-b.left)/b.width-.5);y.set((e.clientY-b.top)/b.height-.5)}
   return <motion.div onMouseMove={move} onMouseLeave={()=>{x.set(0);y.set(0)}} style={{rotateX:rx,rotateY:ry,transformPerspective:900}} className={className}>{children}</motion.div>}
-const strip=[['gift','Free to use'],['lock','Private in your browser'],['download','Export your backups'],['phone','Works on any screen']]
+const strip=[['gift','Free to use'],['lock','Private in your browser'],['download','Print or save recipe cards'],['phone','Works on any screen']]
 const tabs=[
  ['Recipe Book','book','Every recipe, beautifully kept','Write your own or save one from Discover. Add photos, steps and links, convert units and temperatures, and print.',
   <div className="relative mx-auto h-56 w-64">{S.slice(0,3).map((r,i)=><img key={r.sid} src={r.image} alt="" className="absolute h-44 w-44 rounded-2xl border-4 border-white object-cover shadow-xl transition duration-500 hover:z-10 hover:scale-105" style={{left:i*36,top:i*14,transform:`rotate(${(i-1)*7}deg)`}}/>)}</div>],
@@ -24,7 +24,7 @@ const tabs=[
 export default function Landing(){
   const [tab,setTab]=useState(0),[,,t1,t2,t3]=tabs[tab]
   return <div className="frame overflow-x-clip">
-    <nav className="relative z-10 mx-auto flex max-w-[1400px] items-center justify-between gap-3 px-4 py-4 md:px-8"><Logo tag/>
+    <nav className="relative z-10 mx-auto flex max-w-[1400px] items-center justify-between gap-3 px-4 py-4 md:px-8"><Logo size={60} tag/>
       <div className="hidden gap-8 text-sm font-medium md:flex"><a href="#features" className="hover:text-caramel">Features</a><a href="#popular" className="hover:text-caramel">Popular bakes</a></div>
       <div className="flex items-center gap-2"><Link to="/login" className="px-3 py-2 text-sm font-medium hover:text-caramel">Sign in</Link><Link to="/register" className="btn">Create account</Link></div></nav>
     <section className="relative -mt-20 overflow-hidden bg-gradient-to-br from-blush via-[#EBD9CF] to-rose/70 pt-24">

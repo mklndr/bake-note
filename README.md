@@ -9,7 +9,7 @@ npm run build    # production build -> dist/
 ## Deploy (Vercel)
 Push to GitHub, import the repo in Vercel (framework: Vite). `vercel.json` handles SPA routing.
 ## Features
-Local accounts · Recipe CRUD (photo, ingredients, steps, link, favorites, print) · Discover (API + built-in) · Baking Journal (several journals on a shelf) with draggable sticky notes · BakeNotes page (colors, pin, categories, recipe attach) · Pantry · What Can I Bake? · Shopping list
+Local accounts · Recipe CRUD (photo, ingredients, steps, link, favorites, print) · Discover (API + built-in) · Baking Journal (several journals on a shelf) with draggable sticky notes · BakeNotes page (colors, pin, categories, recipe attach) · Pantry (separate containers per expiry date) · What Can I Bake? · Shopping list
 ## Limitations
 Data is per-browser/device. Passwords are only obfuscated – this is not real authentication.
 ## v3 additions
