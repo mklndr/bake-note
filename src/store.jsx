@@ -1,5 +1,5 @@
 import {createContext,useContext,useEffect,useState,useCallback} from 'react'
-import {isDemo,seedData} from './demoSeed.js'
+import {isDemo,seedData,sampleEntries,SAMPLE_J} from './demoSeed.js'
 const C=createContext()
 export const useApp=()=>useContext(C)
 export const uid=()=>Math.random().toString(36).slice(2,9)
@@ -11,7 +11,9 @@ export function Provider({children}){
   const [data,setData]=useState(()=>user?load(user.id):empty)
   const [msg,setMsg]=useState(null)
   useEffect(()=>{if(user)try{localStorage.setItem('bn_data_'+user.id,JSON.stringify(data))}catch{setMsg({t:'Storage is full – delete some photos.',err:1})}},[data,user])
-  useEffect(()=>{if(!user||!isDemo(user)||localStorage.getItem('bn_seeded_'+user.id))return;setData(d=>seedData(d,uid));localStorage.setItem('bn_seeded_'+user.id,'1');setMsg({t:'Sample ingredients and journal added to your account'});setTimeout(()=>setMsg(null),3500)},[user])
+  useEffect(()=>{if(!user||!isDemo(user))return
+    if(!localStorage.getItem('bn_seeded_'+user.id)){setData(d=>seedData(d,uid));localStorage.setItem('bn_seeded_'+user.id,'1');localStorage.setItem('bn_seeded_j2_'+user.id,'1');setMsg({t:'Sample ingredients and journal added to your account'});setTimeout(()=>setMsg(null),3500)}
+    else if(!localStorage.getItem('bn_seeded_j2_'+user.id)){localStorage.setItem('bn_seeded_j2_'+user.id,'1');setData(d=>{const n=d.journal.filter(j=>j.sample).length;return n&&n<SAMPLE_J.length?{...d,journal:[...sampleEntries(d.recipes,n).map(e=>({id:uid(),...e})),...d.journal]}:d});setMsg({t:'3 more sample journal entries added'});setTimeout(()=>setMsg(null),3500)}},[user])
   const toast=useCallback((t,err)=>{setMsg({t,err});setTimeout(()=>setMsg(null),2500)},[])
   const start=u=>{setData(load(u.id));setUser(u);localStorage.setItem('bn_session',JSON.stringify(u))}
   const register=(name,email,pw)=>{
