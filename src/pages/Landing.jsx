@@ -24,9 +24,9 @@ const tabs=[
 export default function Landing(){
   const [tab,setTab]=useState(0),[,,t1,t2,t3]=tabs[tab]
   return <div className="frame overflow-x-clip">
-    <nav className="relative z-10 mx-auto flex max-w-[1400px] items-center justify-between gap-3 px-4 py-4 md:px-8"><Logo size={60} tag/>
+    <nav className="relative z-10 mx-auto flex max-w-[1400px] items-center justify-between gap-3 px-4 py-4 md:px-8"><span className="sm:hidden"><Logo size={44}/></span><span className="hidden sm:block"><Logo size={60} tag/></span>
       <div className="hidden gap-8 text-sm font-medium md:flex"><a href="#features" className="hover:text-caramel">Features</a><a href="#popular" className="hover:text-caramel">Popular bakes</a></div>
-      <div className="flex items-center gap-2"><Link to="/login" className="px-3 py-2 text-sm font-medium hover:text-caramel">Sign in</Link><Link to="/register" className="btn">Create account</Link></div></nav>
+      <div className="flex items-center gap-2"><Link to="/login" className="px-3 py-2 text-sm font-medium hover:text-caramel">Sign in</Link><Link to="/register" className="btn px-4 sm:px-5">Create account</Link></div></nav>
     <section className="relative -mt-20 overflow-hidden bg-gradient-to-br from-blush via-[#EBD9CF] to-rose/70 pt-24">
       <span className="absolute -left-24 top-40 h-72 w-72 rounded-full bg-white/30"/>
       <div className="relative mx-auto grid max-w-[1400px] items-center gap-10 px-4 pb-16 md:px-8 lg:grid-cols-[1.05fr_1fr]">

@@ -39,3 +39,11 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;background:radial-grad
 .spin{animation:spin 20s linear infinite}
 .blob{animation:blob 9s ease-in-out infinite}
 @media print{.noprint{display:none!important}body{background:#fff}.frame{margin:0;box-shadow:none}}
+
+/* Responsive safety */
+html{-webkit-text-size-adjust:100%}
+body{overflow-x:clip;min-height:100dvh}
+img,video,canvas{max-width:100%}
+@media (max-width:639px){.input{font-size:16px}}
+@media (pointer:coarse){.btn,.btn-o{min-height:44px}}
+@media (max-width:639px){.hand{overflow-wrap:anywhere}}
