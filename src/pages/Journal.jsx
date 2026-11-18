@@ -1,27 +1,49 @@
-import {useState} from 'react'
+import {useState,useEffect} from 'react'
 import {useApp} from '../store.jsx'
-import {Title,Empty,Field,ImageUpload,Stars} from '../components/ui.jsx'
-import StickyNote from '../components/StickyNote.jsx'
+import {Title,Field,ImageUpload,Stars} from '../components/ui.jsx'
+import StickyNote,{NOTE_COLORS} from '../components/StickyNote.jsx'
+import InteractiveBook from '../components/InteractiveBook.jsx'
+import Icon from '../components/Icon.jsx'
+const SPINE=['#3B2A2A','#7A6258','#B98F88','#8F6E63','#A38476','#5E463E'],W=320,H=460
+const blank=()=>({recipeId:'',date:new Date().toISOString().slice(0,10),photo:'',notes:'',good:'',improve:'',rating:0})
 export default function Journal(){
-  const {data,add,del,upd,toast}=useApp(),[open,setOpen]=useState(false),blank={recipeId:'',date:new Date().toISOString().slice(0,10),photo:'',notes:'',good:'',improve:'',rating:0},[f,setF]=useState(blank),[err,setErr]=useState('')
-  const set=k=>e=>setF({...f,[k]:e.target.value}),title=id=>data.recipes.find(r=>r.id===id)?.title||'Freestyle bake'
-  const submit=e=>{e.preventDefault();if(!f.date||(!f.notes.trim()&&!f.good.trim()))return setErr('Add a date and at least a few notes.');add('journal',f);setF(blank);setOpen(false);setErr('');toast('Journal entry saved')}
-  const onBoard=data.notes.filter(n=>n.onJournal)
-  return <div><Title sub={`${data.journal.length} bakes logged · drag the sticky notes anywhere, they remember where you left them`} action={<button className="btn" onClick={()=>setOpen(!open)}>{open?'Close form':'New entry'}</button>}>Baking Journal</Title>
-    {open&&<form onSubmit={submit} className="card p-5 mb-6 grid md:grid-cols-2 gap-3 max-w-3xl">
-      <Field label="Recipe"><select className="input" value={f.recipeId} onChange={set('recipeId')}><option value="">Freestyle bake</option>{data.recipes.map(r=><option key={r.id} value={r.id}>{r.title}</option>)}</select></Field>
+  const {user,data,add,upd,del,toast}=useApp(),[openId,setOpenId]=useState(null),[idx,setIdx]=useState(-1),[sc,setSc]=useState(1),[nm,setNm]=useState(''),[f,setF]=useState(null),[err,setErr]=useState('')
+  useEffect(()=>{if(!data.journals.some(b=>b.id==='default'))add('journals',{id:'default',title:'My Baking Journal',color:SPINE[0],marks:[]})},[data.journals])
+  useEffect(()=>{const r=()=>setSc(Math.min(1,(window.innerWidth-48)/(W*2.1)));r();window.addEventListener('resize',r);return()=>window.removeEventListener('resize',r)},[])
+  const books=[...data.journals].reverse(),book=books.find(b=>b.id===openId),inBook=(x,id)=>x.bookId===id||(!x.bookId&&id==='default')
+  const entries=id=>data.journal.filter(j=>inBook(j,id)).sort((a,b)=>a.date.localeCompare(b.date)),rt=id=>data.recipes.find(r=>r.id===id)?.title||'Freestyle bake'
+  const set=k=>e=>setF({...f,[k]:e.target.value})
+  const addBook=e=>{e.preventDefault();if(!nm.trim())return;add('journals',{title:nm.trim(),color:SPINE[data.journals.length%SPINE.length],marks:[]});setNm('');toast('Journal added to the shelf')}
+  if(!book)return <div><Title sub={`${data.journal.length} bakes in ${books.length} journals. Pick one from the shelf to open it.`} action={<form onSubmit={addBook} className="flex gap-2"><input aria-label="New journal name" className="input w-48" placeholder="New journal name" value={nm} onChange={e=>setNm(e.target.value)}/><button className="btn">Add journal</button></form>}>Baking Journal</Title>
+    <div className="rounded-[2rem] bg-blush/70 p-4 md:p-8 shadow-inner"><div className="stagger flex flex-wrap items-end gap-3 min-h-60 px-2">
+      {books.map((b,i)=><button key={b.id} onClick={()=>{setOpenId(b.id);setIdx(-1)}} aria-label={`Open ${b.title}`} style={{background:b.color,height:190+(i%3)*20}} className="group relative w-16 origin-bottom overflow-hidden rounded-t-md rounded-b-sm text-cream shadow-lg transition duration-300 hover:-translate-y-3 hover:-rotate-2 focus-visible:-translate-y-3">
+        <span className="absolute inset-x-3 top-3 h-1.5 rounded bg-butter/80"/><span className="absolute inset-x-3 top-7 h-px bg-butter/50"/>
+        <span style={{writingMode:'vertical-rl'}} className="absolute inset-0 top-10 bottom-8 mx-auto flex items-center justify-center px-1 text-center font-serif text-sm font-bold leading-tight">{b.title}</span>
+        <span className="absolute inset-x-0 bottom-2 text-center text-[11px] opacity-80">{entries(b.id).length}</span></button>)}
+      <span className="hand pb-3 pl-3 text-2xl text-caramel">Add a journal for each cookbook, season or experiment.</span></div>
+      <div className="h-4 rounded-b-xl bg-[#8A6A58] shadow-[0_10px_18px_rgba(59,42,42,.28)]"/></div></div>
+  const list=entries(openId),pages=list.length?list.map((j,i)=>({id:j.id,pageNumber:i+1,
+    content:<div className="flex h-full flex-col"><span className="mb-2 w-fit rounded-full bg-cocoa px-3 py-0.5 text-[11px] text-cream">{new Date(j.date+'T00:00').toDateString()}</span>{j.photo&&<img src={j.photo} alt="" className="mb-3 h-44 w-full rounded-xl object-cover"/>}<h3 className="font-serif text-xl font-bold leading-tight">{rt(j.recipeId)}</h3><Stars value={j.rating}/></div>,
+    backContent:<div className="space-y-3 text-sm">{[['Went well',j.good],['To improve',j.improve],['Notes',j.notes]].map(([l,t])=>t&&<p key={l}><b className="font-serif">{l}</b><br/>{t}</p>)}<button className="text-xs underline" onClick={e=>{e.stopPropagation();if(confirm('Delete this entry?')){data.notes.filter(n=>n.face===`f:${j.id}`||n.face===`b:${j.id}`).forEach(n=>del('notes',n.id));del('journal',j.id)}}}>Delete entry</button></div>}))
+    :[{pageNumber:1,content:<div className="grid h-full place-items-center text-center"><p className="hand text-3xl text-caramel">Your first bake goes here.<br/>Tap “New entry”.</p></div>,backContent:<p className="hand text-2xl text-caramel">Add sticky notes and drag them anywhere on the book.</p>}]
+  const marks=(book.marks||[]).filter(m=>m<pages.length),r=idx+1,marked=marks.includes(r),notes=data.notes.filter(n=>n.onJournal&&inBook(n,openId)),faceId=(side,i)=>side==='L'?(i<0?'cover':`b:${pages[i].id??i}`):(i+1<pages.length?`f:${pages[i+1].id??i+1}`:'end'),noteFace=n=>n.face??`f:${pages[0].id??0}`
+  const toggleMark=()=>{if(r>=pages.length)return toast('Turn to a page with an entry first',1);upd('journals',openId,{marks:marked?marks.filter(m=>m!==r):[...marks,r].sort((a,b)=>a-b)});toast(marked?'Bookmark removed':'Page bookmarked')}
+  const addNote=side=>{const face=faceId(side,idx),k=notes.filter(n=>noteFace(n)===face).length%4;add('notes',{title:'New note',text:'Tap Edit to write me',color:NOTE_COLORS[notes.length%6],category:'Personal Notes',pinned:false,onJournal:true,bookId:openId,face,recipeId:'',x:60+k*20,y:90+k*30})}
+  const submit=e=>{e.preventDefault();if(!f.date||(!f.notes.trim()&&!f.good.trim()))return setErr('Add a date and at least a few notes.');add('journal',{...f,bookId:openId});setIdx(list.length-1);setF(null);setErr('');toast('Journal entry saved')}
+  const dropBook=()=>{if(!confirm('Delete this journal and all its entries?'))return;data.journal.filter(j=>inBook(j,openId)).forEach(j=>del('journal',j.id));notes.forEach(n=>del('notes',n.id));del('journals',openId);setOpenId(null)}
+  return <div className="space-y-4"><div className="noprint flex flex-wrap items-center gap-2"><button className="btn-o" onClick={()=>setOpenId(null)}>Back to shelf</button><h1 className="mr-auto font-serif text-2xl font-bold">{book.title}</h1>
+      <button className="btn" onClick={()=>setF(blank())}>New entry</button><button className="btn-o" onClick={()=>addNote('L')}>Note on left page</button><button className="btn-o" onClick={()=>addNote('R')}>Note on right page</button>
+      <button className={marked?'btn':'btn-o'} onClick={toggleMark} aria-pressed={marked}>{marked?'Remove bookmark':'Bookmark this page'}</button>{openId!=='default'&&<button className="btn-o" onClick={dropBook}>Delete journal</button>}</div>
+    {marks.length>0&&<div className="noprint flex flex-wrap items-center gap-2 text-sm"><span className="text-caramel">Bookmarks</span>{marks.map(m=><button key={m} onClick={()=>setIdx(m-1)} className="rounded-full bg-butter px-3 py-1 font-medium hover:brightness-95 transition">Page {m*2+1}</button>)}</div>}
+    {f&&<form onSubmit={submit} className="card noprint grid gap-3 p-5 md:grid-cols-2 xl:grid-cols-3">
+      <Field label="Recipe"><select className="input" value={f.recipeId} onChange={set('recipeId')}><option value="">Freestyle bake</option>{data.recipes.map(x=><option key={x.id} value={x.id}>{x.title}</option>)}</select></Field>
       <Field label="Date"><input type="date" className="input" value={f.date} onChange={set('date')}/></Field>
       <Field label="What went well"><textarea className="input" value={f.good} onChange={set('good')}/></Field><Field label="What to improve"><textarea className="input" value={f.improve} onChange={set('improve')}/></Field>
       <Field label="Observations"><textarea className="input" value={f.notes} onChange={set('notes')}/></Field>
       <div><Field label="Photo of your bake"><ImageUpload value={f.photo} onChange={v=>setF({...f,photo:v})}/></Field><div className="mt-2"><Stars value={f.rating} onChange={v=>setF({...f,rating:v})}/></div></div>
-      {err&&<p role="alert" className="text-red-700 text-sm">{err}</p>}<button className="btn md:col-span-2 w-fit">Save entry</button></form>}
-    <div className="relative min-h-[640px] rounded-3xl p-5 md:p-8 border border-rose/40 shadow-inner" style={{background:'repeating-linear-gradient(#fffaf0,#fffaf0 31px,#f4c6c3 32px)'}}>
-      {data.journal.length?<div className="grid md:grid-cols-2 gap-5 max-w-4xl">{[...data.journal].sort((a,b)=>b.date.localeCompare(a.date)).map(j=><div key={j.id} className="bg-white/90 rounded-2xl p-4 shadow">
-        {j.photo&&<img src={j.photo} alt="" className="h-40 w-full object-cover rounded-xl mb-2"/>}
-        <p className="hand text-2xl">{title(j.recipeId)}</p><p className="text-xs mb-1">{new Date(j.date+'T00:00').toDateString()}</p><Stars value={j.rating}/>
-        {j.good&&<p className="text-sm mt-1"><b>Went well:</b> {j.good}</p>}{j.improve&&<p className="text-sm"><b>Improve:</b> {j.improve}</p>}{j.notes&&<p className="text-sm">{j.notes}</p>}
-        <button className="text-xs underline mt-2" onClick={()=>{if(confirm('Delete this entry?'))del('journal',j.id)}}>Delete</button></div>)}</div>
-      :<Empty>No entries yet. Log your first bake!</Empty>}
-      {onBoard.map(n=><StickyNote key={n.id} n={n} drag onMove={(x,y)=>upd('notes',n.id,{x,y})} onPin={()=>upd('notes',n.id,{pinned:!n.pinned})} onEdit={()=>upd('notes',n.id,{onJournal:false})} onDel={()=>del('notes',n.id)} recipe={data.recipes.find(r=>r.id===n.recipeId)}/>)}
-      {!onBoard.length&&<p className="hand text-xl text-caramel mt-6">Tip: turn on “Stick on journal” when you create a note.</p>}</div></div>
+      {err&&<p role="alert" className="text-sm text-red-700">{err}</p>}<div className="flex gap-2 md:col-span-2"><button className="btn">Save entry</button><button type="button" className="btn-o" onClick={()=>{setF(null);setErr('')}}>Cancel</button></div></form>}
+    <div className="flex justify-center overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_20%_15%,#E8D8CE,transparent_45%),radial-gradient(circle_at_85%_85%,#B98F88,transparent_45%)] bg-blush/70 py-8"><div style={{width:W*2.2*sc,height:(H+90)*sc}}><div style={{width:W*2.2,height:H+90,transform:`scale(${sc})`,transformOrigin:'top left'}}>
+      <InteractiveBook key={openId} defaultOpen width={W} height={H} bookTitle={book.title} bookAuthor={user.name} coverImage={list.find(j=>j.photo)?.photo} pages={pages} index={idx} onIndexChange={setIdx} onClose={()=>setOpenId(null)} bookmarks={marks}
+        pageNotes={face=>notes.filter(n=>noteFace(n)===face).map(n=><StickyNote key={n.id} n={n} drag sc={sc} onMove={(x,y)=>upd('notes',n.id,{x,y})} onPin={()=>upd('notes',n.id,{pinned:!n.pinned})} onEdit={()=>{const t=prompt('Note text',n.text);if(t!==null)upd('notes',n.id,{text:t})}} onDel={()=>del('notes',n.id)} recipe={data.recipes.find(x=>x.id===n.recipeId)}/>)}/></div></div></div>
+    <p className="noprint text-center text-sm text-caramel">Arrow keys or a click turn the pages. Sticky notes are stuck to a page and turn over with it. Drag them anywhere on their page.</p></div>
 }

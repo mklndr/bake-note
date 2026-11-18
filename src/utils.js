@@ -18,12 +18,22 @@ export function convTemp(t,mode){
 export const AISLES=['Dairy & Eggs','Dry goods','Wet & liquids','Other']
 export const aisle=n=>{n=n.toLowerCase();return /milk|butter|egg|cream|cheese|yogurt|yoghurt/.test(n)?AISLES[0]:/oil|vanilla|extract|honey|syrup|water|juice|molasses/.test(n)?AISLES[2]:/flour|sugar|salt|soda|powder|cocoa|yeast|chip|oat|nut|spice|cinnamon|chocolate/.test(n)?AISLES[1]:AISLES[3]}
 export function cleanSteps(t=''){
-  let L=t.split(/\r?\n/).map(s=>s.trim()).filter(s=>s&&!/^step\s*\d+\.?$/i.test(s)&&!/^\d+\.?$/.test(s)).map(s=>s.replace(/^(step\s*\d+[:.)-]?\s*|\d+[.)]\s+)/i,''))
-  if(L.length<=2&&L.join(' ').length>200)L=L.join(' ').split(/(?<=[.!?])\s+(?=[A-Z])/)
-  return L.filter(s=>s.length>1)
+  let s=String(t).replace(/\r/g,'\n').replace(/\u00a0/g,' ')
+  s=s.replace(/(?:^|\s)(?:step\s*)?\d{1,2}[.)]\s+(?=[A-Z])/gi,'\n')
+  let L=s.split('\n').map(x=>x.trim()).filter(Boolean).filter(x=>!/^(step\s*\d+|\d+)\s*[.:)]?$/i.test(x)).map(x=>x.replace(/^(step\s*\d+\s*[:.)-]?\s*|\d+\s*[.)]\s+|[-•*]\s+)/i,'').trim()).filter(Boolean)
+  const J=[];for(const l of L){const p=J[J.length-1];if(p&&!/[.!?:;)"”']$/.test(p)&&/^[a-z(]/.test(l))J[J.length-1]=p+' '+l;else J.push(l)}
+  L=J
+  if(L.length<=2&&L.join(' ').length>180)L=L.join(' ').split(/(?<=[.!?])\s+(?=[A-Z0-9])/)
+  const M=[];for(const l of L){const p=M[M.length-1];if(p&&l.length<24)M[M.length-1]=p+' '+l;else M.push(l)}
+  return M.filter(x=>x.length>1)
 }
 export function matchRecipes(recipes,pantry){
   const have=pantry.filter(p=>+p.qty>0).map(p=>p.name.trim().toLowerCase())
   return recipes.map(r=>{const miss=r.ingredients.filter(i=>{const n=i.name.trim().toLowerCase();return !have.some(h=>h.includes(n)||n.includes(h))})
     return{r,missing:miss,pct:r.ingredients.length?Math.round(100*(r.ingredients.length-miss.length)/r.ingredients.length):0}})
 }
+
+export const SCALES=[[.25,'¼× (quarter)'],[.5,'½× (half)'],[1,'1× (original)'],[1.5,'1½×'],[2,'2× (double)'],[3,'3× (triple)'],[4,'4×'],[6,'6×']]
+export function scaleQty(q,f){const n=num(q);if(isNaN(n)||f===1)return q;return String(Math.round(n*f*100)/100)}
+export const PANS=[['6 in (15 cm) round',Math.PI*9],['8 in (20 cm) round',Math.PI*16],['9 in (23 cm) round',Math.PI*20.25],['10 in (25 cm) round',Math.PI*25],['8 in (20 cm) square',64],['9 in (23 cm) square',81],['9×13 in (23×33 cm) rectangle',117],['9×5 in (23×13 cm) loaf',45],['8×4 in (20×10 cm) loaf',32]]
+export const panFactor=(a,b)=>{const A=PANS.find(p=>p[0]===a)?.[1],B=PANS.find(p=>p[0]===b)?.[1];return A&&B?Math.round(B/A*100)/100:1}

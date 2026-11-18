@@ -3,7 +3,7 @@ const C=createContext()
 export const useApp=()=>useContext(C)
 export const uid=()=>Math.random().toString(36).slice(2,9)
 const ls=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}}
-const empty={recipes:[],journal:[],notes:[],pantry:[],equipment:[],shopping:[]}
+const empty={recipes:[],journal:[],journals:[],notes:[],pantry:[],equipment:[],shopping:[]}
 const load=id=>({...empty,...ls('bn_data_'+id,{})})
 export function Provider({children}){
   const [user,setUser]=useState(()=>ls('bn_session',null))
