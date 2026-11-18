@@ -4,6 +4,7 @@ import {Link} from 'react-router-dom'
 import {useApp} from '../store.jsx'
 import {Title,Empty,Field,UnitSelect} from '../components/ui.jsx'
 import {exportList} from '../cardExport.js'
+import {SAMPLE_PANTRY,dayPlus} from '../demoSeed.js'
 import {AISLES,aisle,matchRecipes} from '../utils.js'
 const today=()=>new Date().toISOString().slice(0,10)
 function Jar({i,adj,del}){
@@ -14,13 +15,11 @@ function Jar({i,adj,del}){
     {days!==null&&days<=7&&<p className={`text-[10px] ${days<0?'text-red-700':'text-amber-700'}`}>{days<0?'Expired':`Expires in ${days}d`}</p>}
     <div className="flex justify-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition mt-1"><button aria-label="Less" className="h-6 w-6 rounded-full bg-cocoa text-cream" onClick={()=>adj(i,-step)}>−</button><button aria-label="More" className="h-6 w-6 rounded-full bg-cocoa text-cream" onClick={()=>adj(i,step)}>+</button><button aria-label="Remove" className="h-6 w-6 rounded-full border border-cocoa/40" onClick={()=>del('pantry',i.id)}>✕</button></div></div>
 }
-const dayStr=n=>{const d=new Date();d.setDate(d.getDate()+n);return d.toLocaleDateString('en-CA')}
-const SAMPLE_PANTRY=[['Flour',1500,'g',200],['Sugar',800,'g',300],['Brown sugar',400,'g',250],['Powdered sugar',300,'g',250],['Butter',250,'g',5],['Egg',6,'pcs',4],['Milk',500,'ml',2],['Heavy cream',250,'ml',1],['Cream cheese',200,'g',6],['Baking powder',100,'g',180],['Baking soda',50,'g',220],['Cocoa powder',150,'g',160],['Chocolate chips',200,'g',120],['Vanilla extract',60,'ml',365],['Salt',500,'g',null],['Yeast',14,'g',30],['Vegetable oil',500,'ml',150],['Honey',250,'ml',null],['Lemon',2,'pcs',3],['Cornstarch',0,'g',null],['Walnuts',0,'g',null]]
 export function Pantry(){
   const {data,add,upd,del,toast}=useApp(),[f,setF]=useState({name:'',qty:'',unit:'g',exp:''}),[eq,setEq]=useState(''),[err,setErr]=useState('')
   const submit=e=>{e.preventDefault();if(!f.name.trim())return setErr('Enter a name.');if(f.qty===''||+f.qty<0)return setErr('Enter a quantity of 0 or more.');add('pantry',{...f,full:+f.qty});setF({name:'',qty:'',unit:'g',exp:''});setErr('');toast('Added to pantry')}
   const missing=SAMPLE_PANTRY.filter(x=>!data.pantry.some(p=>p.name.toLowerCase()===x[0].toLowerCase()))
-  const addSamples=()=>{missing.forEach(([name,qty,unit,days])=>add('pantry',{name,qty,unit,exp:days==null?'':dayStr(days),full:qty||250}));toast(`${missing.length} sample ingredients added`)}
+  const addSamples=()=>{missing.forEach(([name,qty,unit,days])=>add('pantry',{name,qty,unit,exp:days==null?'':dayPlus(days),full:qty||250}));toast(`${missing.length} sample ingredients added`)}
   const adj=(i,d)=>{const q=Math.max(0,(+i.qty||0)+d);upd('pantry',i.id,{qty:q,full:Math.max(i.full||0,q)})}
   return <div><Title sub={`${data.pantry.length} ingredients · ${data.pantry.filter(i=>!(+i.qty>0)).length} out of stock · hover a jar to adjust it`} action={missing.length>0&&<button className="btn-o" onClick={addSamples}>Add sample ingredients</button>}>My Pantry</Title>
     <form onSubmit={submit} className="card p-4 flex flex-wrap gap-2 items-end mb-5"><Field label="Ingredient"><input className="input" value={f.name} onChange={e=>setF({...f,name:e.target.value})}/></Field><Field label="Quantity"><input type="number" min="0" step="any" inputMode="decimal" className="input w-24" value={f.qty} onKeyDown={e=>['-','+','e','E'].includes(e.key)&&e.preventDefault()} onChange={e=>setF({...f,qty:+e.target.value<0?'0':e.target.value})}/></Field><Field label="Unit"><UnitSelect value={f.unit} onChange={v=>setF({...f,unit:v})} className="w-28"/></Field><Field label="Expires"><input type="date" className="input" value={f.exp} onChange={e=>setF({...f,exp:e.target.value})}/></Field><button className="btn">Add jar</button>{err&&<p role="alert" className="text-red-700 text-sm w-full">{err}</p>}</form>

@@ -4,10 +4,9 @@ import {Title,Field,ImageUpload,Stars} from '../components/ui.jsx'
 import StickyNote,{NOTE_COLORS} from '../components/StickyNote.jsx'
 import InteractiveBook from '../components/InteractiveBook.jsx'
 import Icon from '../components/Icon.jsx'
+import {SAMPLE_J,dayAgo} from '../demoSeed.js'
 const SPINE=['#3B2A2A','#7A6258','#B98F88','#8F6E63','#A38476','#5E463E'],W=320,H=460
 const blank=()=>({recipeId:'',date:new Date().toISOString().slice(0,10),photo:'',notes:'',good:'',improve:'',rating:0})
-const dayStr=n=>{const d=new Date();d.setDate(d.getDate()-n);return d.toLocaleDateString('en-CA')}
-const SAMPLE_J=[[0,5,'Crisp edges and a chewy middle. Mixed dark and milk chocolate.','Chilled the dough overnight','Use less flaky salt on top'],[1,4,'Rose evenly and smelled amazing while baking.','Room-temperature eggs mixed in smoothly','Needed 3 more minutes in my oven'],[2,3,'Good flavor but a bit dry on the edges.','Nice golden color','Pull it out 5 minutes earlier next time'],[4,5,'Everyone asked for seconds.','Weighing the flour made a big difference','Try adding a pinch of cinnamon'],[6,4,'Soft and fluffy crumb.','Folded the flour gently','Cooled too fast, frosting slid a little'],[9,2,'Spread too thin and went flat.','Tasted great anyway','Butter was too soft, chill the dough first'],[13,4,'Crackly top and rich flavor.','Used good quality cocoa','Slightly underbaked in the center'],[18,5,'My best bake so far.','Followed the steps exactly','Nothing, I would make it again']]
 export default function Journal(){
   const {user,data,add,upd,del,toast}=useApp(),[openId,setOpenId]=useState(null),[idx,setIdx]=useState(-1),[sc,setSc]=useState(1),[nm,setNm]=useState(''),[f,setF]=useState(null),[err,setErr]=useState('')
   useEffect(()=>{if(!data.journals.some(b=>b.id==='default'))add('journals',{id:'default',title:'My Baking Journal',color:SPINE[0],marks:[]})},[data.journals])
@@ -15,7 +14,7 @@ export default function Journal(){
   const books=[...data.journals].reverse(),book=books.find(b=>b.id===openId),inBook=(x,id)=>x.bookId===id||(!x.bookId&&id==='default')
   const entries=id=>data.journal.filter(j=>inBook(j,id)).sort((a,b)=>a.date.localeCompare(b.date)),rt=id=>data.recipes.find(r=>r.id===id)?.title||'Freestyle bake'
   const set=k=>e=>setF({...f,[k]:e.target.value})
-  const addSampleJournal=()=>{[...SAMPLE_J].reverse().forEach(([ago,rating,notes,good,improve],i)=>{const r=data.recipes[(SAMPLE_J.length-1-i)%Math.max(1,data.recipes.length)];add('journal',{recipeId:r?.id||'',date:dayStr(ago),photo:r?.image||'',notes,good,improve,rating,sample:true})});toast('Sample journal entries added to My Baking Journal')}
+  const addSampleJournal=()=>{[...SAMPLE_J].reverse().forEach(([ago,rating,notes,good,improve],i)=>{const r=data.recipes[(SAMPLE_J.length-1-i)%Math.max(1,data.recipes.length)];add('journal',{recipeId:r?.id||'',date:dayAgo(ago),photo:r?.image||'',notes,good,improve,rating,sample:true})});toast('Sample journal entries added to My Baking Journal')}
   const addBook=e=>{e.preventDefault();if(!nm.trim())return;add('journals',{title:nm.trim(),color:SPINE[data.journals.length%SPINE.length],marks:[]});setNm('');toast('Journal added to the shelf')}
   if(!book)return <div><Title sub={`${data.journal.length} bakes in ${books.length} journals. Pick one from the shelf to open it.`} action={<div className="flex flex-wrap gap-2">{!data.journal.some(j=>j.sample)&&<button type="button" className="btn-o" onClick={addSampleJournal}>Add sample journal</button>}<form onSubmit={addBook} className="flex gap-2"><input aria-label="New journal name" className="input w-48" placeholder="New journal name" value={nm} onChange={e=>setNm(e.target.value)}/><button className="btn">Add journal</button></form></div>}>Baking Journal</Title>
     <div className="rounded-[2rem] bg-blush/70 p-4 md:p-8 shadow-inner"><div className="stagger flex flex-wrap items-end gap-3 min-h-60 px-2">
