@@ -42,8 +42,8 @@ export function Provider({children}){
   const upd=(k,id,p)=>setData(d=>({...d,[k]:d[k].map(i=>i.id===id?{...i,...p}:i)}))
   const del=(k,id)=>setData(d=>({...d,[k]:d[k].filter(i=>i.id!==id)}))
   return <C.Provider value={{user,data,updateProfile,restore,register,login,logout,add,upd,del,toast,ask}}>{children}
-    {dlg&&<div className="fixed inset-0 z-[80] grid place-items-center bg-cocoa/40 p-4 backdrop-blur-sm" onClick={()=>answer(false)}><div role="alertdialog" aria-modal="true" aria-labelledby="dlg-t" onClick={e=>e.stopPropagation()} className="w-full max-w-sm rounded-3xl border border-white/70 bg-cream p-6 shadow-2xl">
+    {dlg&&<div className="fixed inset-0 z-[80] grid place-items-center bg-cocoa/40 p-4 backdrop-blur-sm" onClick={()=>answer(false)}><div role="alertdialog" aria-modal="true" aria-labelledby="dlg-t" onClick={e=>e.stopPropagation()} className="max-h-[90dvh] w-full max-w-sm overflow-y-auto rounded-3xl border border-white/70 bg-cream p-5 shadow-2xl sm:p-6">
       <h2 id="dlg-t" className="text-xl font-bold">{dlg.title}</h2>{dlg.text&&<p className="mt-2 text-sm text-caramel">{dlg.text}</p>}
       <div className="mt-5 flex justify-end gap-2"><button type="button" className="btn-o" onClick={()=>answer(false)}>Cancel</button><button type="button" autoFocus className="btn" style={dlg.danger?{background:'#9B2C2C'}:undefined} onClick={()=>answer(true)}>{dlg.ok||'OK'}</button></div></div></div>}
-    {msg&&<div role="status" className={`fixed bottom-5 left-1/2 -translate-x-1/2 z-50 rounded-full px-5 py-2 text-sm shadow-lg ${msg.err?'bg-red-700':'bg-cocoa'} text-cream`}>{msg.t}</div>}</C.Provider>
+    {msg&&<div role="status" style={{bottom:'max(1.25rem,env(safe-area-inset-bottom))'}} className={`fixed left-1/2 z-[90] w-max max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded-2xl px-5 py-2 text-center text-sm shadow-lg ${msg.err?'bg-red-700':'bg-cocoa'} text-cream`}>{msg.t}</div>}</C.Provider>
 }

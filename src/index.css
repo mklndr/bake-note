@@ -10,7 +10,7 @@ body{@apply text-cocoa font-sans antialiased;background:radial-gradient(55rem 38
 .card{@apply rounded-3xl border border-white/70 bg-white/55 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,.9),0_10px_30px_rgba(59,42,42,.08)]}
 .lift{@apply transition duration-300 hover:-translate-y-1 hover:shadow-[inset_0_1px_0_rgba(255,255,255,.9),0_16px_36px_rgba(59,42,42,.14)]}
 .input{@apply w-full rounded-xl border border-white/80 bg-white/70 backdrop-blur px-3 py-2 text-sm outline-none focus:border-berry focus:ring-2 focus:ring-blush transition}
-.frame{@apply min-h-screen w-full}
+.frame{@apply min-h-dvh w-full}
 }
 body::before{content:'';position:fixed;inset:0;z-index:-1;background:radial-gradient(28rem 28rem at 10% 20%,rgba(185,143,136,.55),transparent 70%),radial-gradient(34rem 34rem at 90% 10%,rgba(232,216,206,.95),transparent 70%),radial-gradient(30rem 30rem at 78% 88%,rgba(122,98,88,.4),transparent 70%),radial-gradient(26rem 26rem at 12% 92%,rgba(185,143,136,.38),transparent 70%)}
 @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
@@ -41,6 +41,12 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;background:radial-grad
 @media print{.noprint{display:none!important}body{background:#fff}.frame{margin:0;box-shadow:none}}
 
 /* Responsive safety */
+body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+@media (hover:none){body{background-attachment:scroll}}
+:where(h1,h2,h3,p,li){overflow-wrap:break-word}
+select,input,textarea{max-width:100%}
+.input{min-width:0}
+@media (max-width:379px){.btn,.btn-o{padding-left:.9rem;padding-right:.9rem}}
 html{-webkit-text-size-adjust:100%}
 body{overflow-x:clip;min-height:100dvh}
 img,video,canvas{max-width:100%}

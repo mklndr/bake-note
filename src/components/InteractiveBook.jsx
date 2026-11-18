@@ -1,10 +1,11 @@
-import {useState,useEffect} from 'react'
+import {useState,useEffect,useRef} from 'react'
 import {motion,AnimatePresence} from 'framer-motion'
 import Icon from './Icon.jsx'
 const OPEN=1.5,EASE=[0.25,0,0,1],H3D={backfaceVisibility:'hidden',WebkitBackfaceVisibility:'hidden'}
-export default function InteractiveBook({coverImage,bookTitle='Book title',bookAuthor='',pages,width=320,height=460,defaultOpen=false,index,onIndexChange,onClose,bookmarks=[],overlay,pageNotes}){
+export default function InteractiveBook({onOpenChange,coverImage,bookTitle='Book title',bookAuthor='',pages,width=320,height=460,defaultOpen=false,index,onIndexChange,onClose,bookmarks=[],overlay,pageNotes}){
   const [open,setOpen]=useState(defaultOpen),[idx,setI]=useState(-1),[hover,setHover]=useState(false),setIdx=f=>setI(c=>typeof f==='function'?f(c):f)
   useEffect(()=>{onIndexChange?.(idx)},[idx])
+  useEffect(()=>{onOpenChange?.(open)},[open])
   useEffect(()=>{if(index!==undefined&&index!==idx)setI(index)},[index])
   const next=e=>{e?.stopPropagation();setIdx(i=>Math.min(i+1,pages.length-1))}
   const prev=e=>{e?.stopPropagation();setIdx(i=>Math.max(i-1,-1))}
@@ -45,4 +46,17 @@ export default function InteractiveBook({coverImage,bookTitle='Book title',bookA
     {open&&overlay&&<div className="pointer-events-none absolute z-[500]" style={{left:width*.1,top:45,width:width*2,height}}>{overlay}</div>}
     {!open&&<motion.p initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{delay:1,duration:1}} className="absolute bottom-2 hand text-2xl text-caramel">Click the book to open</motion.p>}
   </div>
+}
+
+// Fits the book to whatever space it has. It is sized to the real container (not the window),
+// shows the closed cover large, then eases to a smaller size when the spread opens.
+export function BookStage({W=320,H=460,pageNotes,onOpenChange,className='',...rest}){
+  const box=useRef(null),[avail,setAvail]=useState(0),[open,setOpen]=useState(false)
+  useEffect(()=>{const el=box.current;if(!el)return;const m=()=>{const cs=getComputedStyle(el);setAvail(el.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight))};m()
+    if(typeof ResizeObserver==='undefined'){window.addEventListener('resize',m);return()=>window.removeEventListener('resize',m)}
+    const ro=new ResizeObserver(m);ro.observe(el);return()=>ro.disconnect()},[])
+  const sc=avail>0?Math.min(1,avail/(open?W*2.1:W*1.15)):1
+  return <div ref={box} className={'flex justify-center overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_20%_15%,#E8D8CE,transparent_45%),radial-gradient(circle_at_85%_85%,#B98F88,transparent_45%)] bg-blush/70 px-2 py-5 sm:px-4 sm:py-8 '+className}>
+    <div className="shrink-0 transition-[width,height] duration-700 ease-out" style={{width:W*2.2*sc,height:(H+90)*sc}}><div className="transition-transform duration-700 ease-out" style={{width:W*2.2,height:H+90,transform:`scale(${sc})`,transformOrigin:'top left'}}>
+      <InteractiveBook {...rest} width={W} height={H} onOpenChange={o=>{setOpen(o);onOpenChange?.(o)}} pageNotes={pageNotes&&(f=>pageNotes(f,sc))}/></div></div></div>
 }

@@ -23,5 +23,5 @@ const RX=new RegExp('\\b((?:'+pats.map(p=>esc(p[0])).join('|')+')(?:s|es|ed|d|in
 const find=w=>{const l=w.toLowerCase();return pats.find(p=>l.startsWith(p[0]))?.[1]}
 export function GlossaryText({text}){
   return text.split(RX).map((p,i)=>{const g=i%2?find(p):null
-    return g?<span key={i} tabIndex={0} className="group relative cursor-help underline decoration-rose decoration-dotted underline-offset-2">{p}<span role="tooltip" className="pointer-events-none invisible absolute bottom-full left-0 z-30 mb-1 w-60 rounded-xl bg-cocoa p-2.5 text-xs font-normal leading-snug text-cream shadow-lg group-hover:visible group-focus:visible"><b className="block">{g.t}</b>{g.d}</span></span>:p})
+    return g?<span key={i} tabIndex={0} className="group relative cursor-help underline decoration-rose decoration-dotted underline-offset-2">{p}<span role="tooltip" className="pointer-events-none invisible absolute bottom-full left-0 z-[80] mb-1 w-60 rounded-xl max-sm:fixed max-sm:inset-x-4 max-sm:bottom-6 max-sm:mb-0 max-sm:w-auto bg-cocoa p-2.5 text-xs font-normal leading-snug text-cream shadow-lg group-hover:visible group-focus:visible"><b className="block">{g.t}</b>{g.d}</span></span>:p})
 }
